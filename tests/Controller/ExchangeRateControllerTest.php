@@ -22,23 +22,21 @@ use Doctrine\Common\Persistence\ObjectManager;
 class ExchangeRateControllerTest extends WebTestCase {
 
     /**
-     * @dataProvider getRequestData
+     * @dataProvider getUrls
      */
-    public function testRequest(string $httpMethod, string $url) {
+    public function testUrls(string $url) {
         $client = static::createClient();
-        $client->request($httpMethod, $url);
-        $response = $client->getResponse();
-        $this->assertSame(Response::HTTP_FOUND, $response->getStatusCode());
+        $client->request('GET', $url);
         $this->assertSame(
-                'http://localhost/en/login', $response->getTargetUrl(), sprintf('The %s secure URL redirects to the login form.', $url)
+                Response::HTTP_OK, $client->getResponse()->getStatusCode(), sprintf('The %s public URL loads correctly.', $url)
         );
     }
 
-    public function getRequestData() {
-        yield['GET', '/rates'];
-        yield['GET', '/rates'];
-        yield['GET', '/rate'];
+    public function getUrls() {
+        yield ['/'];
+        yield ['/rates'];
     }
+
 
     /**
      * @dataProvider getExchangeRateAddData
@@ -59,18 +57,18 @@ class ExchangeRateControllerTest extends WebTestCase {
                 ->get('doctrine')
                 ->getRepository(ExchangeRate::class)
                 ->findOneBy(array('currency' => $currency, 'base_currency' => $base));
-        
+
         $this->assertNotNull($exchangeRate);
         $this->assertSame($base, $user->getBaseCurrency());
         $this->assertSame($currency, $user->getCurrency());
         $this->assertSame($rate, $user->getExchangeRate());
     }
 
-    public function getExchangeRateAddData(){
-        yield['USD', 'INR',67.67];
-        yield['USD', 'GBP',1.22];
+    public function getExchangeRateAddData() {
+        yield['USD', 'INR', 67.67];
+        yield['USD', 'GBP', 1.22];
     }
-    
+
     /**
      * @dataProvider getExchangeRateEditData
      */
@@ -90,15 +88,16 @@ class ExchangeRateControllerTest extends WebTestCase {
                 ->get('doctrine')
                 ->getRepository(ExchangeRate::class)
                 ->findOneBy(array('currency' => $currency, 'base_currency' => $base));
-        
+
         $this->assertNotNull($exchangeRate);
         $this->assertSame($base, $user->getBaseCurrency());
         $this->assertSame($currency, $user->getCurrency());
         $this->assertSame($rate, $user->getExchangeRate());
     }
 
-    public function getExchangeRateData(){
-        yield['USD', 'INR',65.65];
-        yield['USD', 'GBP',1.22];
+    public function getExchangeRateData() {
+        yield['USD', 'INR', 65.65];
+        yield['USD', 'GBP', 1.22];
     }
+
 }
