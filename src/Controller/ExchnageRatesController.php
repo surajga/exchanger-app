@@ -49,7 +49,7 @@ class ExchnageRatesController extends AbstractController {
     public function addExchangeRate(Request $request) {
         $entityManager = $this->getDoctrine()->getManager();
         $exchangeRates = new ExchangeRates();
-        $exchangeRates->setbaseCurrency($request->request->get('base_currency'));
+        $exchangeRates->setBaseCurrency($request->request->get('base_currency'));
         $exchangeRates->setCurrency($request->request->get('currency'));
         $exchangeRates->setExchangeRate(number_format((float) $request->request->get('exchangeRate'), 2, '.', ''));
         $exchangeRates->setCreatedDatetime(new \DateTime('@' . strtotime('now')));
@@ -68,9 +68,9 @@ class ExchnageRatesController extends AbstractController {
         $entityManager = $this->getDoctrine()->getManager();
         $exchangeRates = $entityManager->getRepository(ExchangeRates::class)
                 ->find($request->request->get('id'));
-
+        
         if (!is_null($exchangeRates)) {
-            $exchangeRates->setbaseCurrency($request->request->get('base_currency'));
+            $exchangeRates->setBaseCurrency($request->request->get('base_currency'));
             $exchangeRates->setCurrency($request->request->get('currency'));
             $exchangeRates->setExchangeRate(number_format((float) $request->request->get('exchangeRate'), 2, '.', ''));
             $exchangeRates->setUpdatedDatetime(new \DateTime('@' . strtotime('now')));
