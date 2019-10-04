@@ -21,7 +21,7 @@ class ExchangeRatesApiService {
     private $api_url;
 
     public function __construct() {
-        $this->api_url = 'http://exchangeratesapi.io/';
+        $this->api_url = 'http://api.exchangeratesapi.io/';
     }
 
     /**
@@ -33,14 +33,16 @@ class ExchangeRatesApiService {
 
         $objHttpClient = HttpClient::create();
         $responseData = $objHttpClient->request('GET', $this->api_url . 'latest?base=' . $base)->getContent();
-        $data = json_decode($responseData);
+        $data = json_decode($responseData,true);
+        
         foreach ($data['rates'] as $currency => $rate) {
             $exchangeRates[] = array(
-                'base_currecny' => $base,
+                'base_currency' => $base,
                 'currency' => $currency,
                 'exchange_rate' => $rate
             );
         }
+        
         return $exchangeRates;
     }
 

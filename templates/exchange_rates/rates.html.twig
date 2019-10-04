@@ -24,7 +24,7 @@
             <div class='col-6'>
                 <a href='{{ path('exchange') }}' class='btn btn-link btn-right'>Back</a>
                 <button class='btn btn-success btn-right' id='add-exchange-rate'> Add </button>
-                <a href='{{ path('latestRates') }}' class='btn btn-warning btn-right'>Refresh Rates</a>
+                <a href='{{ path('latestRates') }}?base={{ base_currency }}' class='btn btn-warning btn-right'>Refresh Rates</a>
             </div>
         </div>
         <br /><br />
