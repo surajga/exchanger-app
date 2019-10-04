@@ -25,7 +25,7 @@ final class Version20191003060107 extends AbstractMigration {
                 . 'currency VARCHAR(50) NOT NULL, '
                 . 'exchange_rate DOUBLE PRECISION NOT NULL, '
                 . 'created_datetime DATETIME NOT NULL, '
-                . 'updated_datetime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, '
+                . 'updated_datetime DATETIME DEFAULT CURRENT_TIMESTAMP, '
                 . 'PRIMARY KEY(id)'
                 . ')DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci ENGINE = InnoDB');
     }

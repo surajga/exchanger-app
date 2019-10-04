@@ -6,11 +6,15 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpClient\HttpClient;
 use App\Service\ExchangeRatesApiService;
 use App\Entity\ExchangeRates;
+use App\Entity\Constants;
 
 class ExchnageRatesController extends AbstractController {
+
+//    const DEFAULT_CURRENCY = 'USD';
+//    const BASE_CURRENCIES = array('USD', 'INR');
+//    const CURRENCY_LIST = array('AUD', 'GBP', 'EUR', 'INR', 'USD');
 
     /**
      * Constructor function
@@ -30,35 +34,28 @@ class ExchnageRatesController extends AbstractController {
      * @Route("/rates", name="show_rates", methods={"GET"})
      */
     public function showExchangeRates(Request $request) {
-        $baseCurrency = ($request->query->get('base')) ? $request->query->get('base') : 'USD';
+        $baseCurrency = ($request->query->get('base')) ? $request->query->get('base') : Constants::DEFAULT_CURRENCY;
         $exchangeRatesData = $this->getDoctrine()
                 ->getRepository(ExchangeRates::class)
                 ->findBy(array('base_currency' => $baseCurrency));
 
 
-        return $this->render('exchange_rates/rates.html.twig', [
+        return $this->render('exchange_rates/rates.html.twig', array(
                     'base_currency' => $baseCurrency,
-                    'base_currencies' => array('USD', 'INR'),
+                    'base_currencies' => Constants::BASE_CURRENCIES,
                     'exchange_rates' => json_decode($this->serializeObjectToJson($exchangeRatesData)),
-                    'currnecy_list' => array('AUD', 'GBP', 'EUR', 'INR', 'USD')]);
+                    'currnecy_list' => Constants::CURRENCY_LIST));
     }
 
     /**
      * @Route("/exchange/add", name="addExchangeRates", methods={"POST"})
      */
     public function addExchangeRate(Request $request) {
-        $entityManager = $this->getDoctrine()->getManager();
-        $exchangeRates = new ExchangeRates();
-        $exchangeRates->setBaseCurrency($request->request->get('base_currency'));
-        $exchangeRates->setCurrency($request->request->get('currency'));
-        $exchangeRates->setExchangeRate(number_format((float) $request->request->get('exchangeRate'), 2, '.', ''));
-        $exchangeRates->setCreatedDatetime(new \DateTime('@' . strtotime('now')));
-        $exchangeRates->setUpdatedDatetime(new \DateTime('@' . strtotime('now')));
-
-        $entityManager->persist($exchangeRates);
-        $entityManager->flush();
-
-        return new Response('Data saved ' . $exchangeRates->getId());
+        $baseCurrency = $request->request->get('base_currency');
+        $currency = $request->request->get('currency');
+        $exchangeRate = $request->request->get('exchangeRate');
+        $insertId = $this->saveExchangeRate($baseCurrency, $currency, $exchangeRate);
+        return new Response('Data saved');
     }
 
     /**
@@ -68,16 +65,15 @@ class ExchnageRatesController extends AbstractController {
         $entityManager = $this->getDoctrine()->getManager();
         $exchangeRates = $entityManager->getRepository(ExchangeRates::class)
                 ->find($request->request->get('id'));
-        
+
         if (!is_null($exchangeRates)) {
             $exchangeRates->setBaseCurrency($request->request->get('base_currency'));
             $exchangeRates->setCurrency($request->request->get('currency'));
-            $exchangeRates->setExchangeRate(number_format((float) $request->request->get('exchangeRate'), 2, '.', ''));
+            $rateValue = number_format((float) $request->request->get('exchangeRate'), 2, '.', '');
+            $exchangeRates->setExchangeRate($rateValue);
             $exchangeRates->setUpdatedDatetime(new \DateTime('@' . strtotime('now')));
-
             $entityManager->persist($exchangeRates);
             $entityManager->flush();
-
             return new Response('Data saved ' . $exchangeRates->getId());
         }
 
@@ -107,7 +103,7 @@ class ExchnageRatesController extends AbstractController {
         $base = $request->query->get('base');
         $exchangeRates = $objService->getCurrentExchangeRate($base);
         $this->refreshExchangeRates($exchangeRates);
-        return $this->redirectToRoute('show_rates');
+        return $this->redirectToRoute('show_rates', array('base' => $base,));
     }
 
     /**
@@ -115,18 +111,9 @@ class ExchnageRatesController extends AbstractController {
      * @param Array $exchangeRates
      */
     private function refreshExchangeRates($exchangeRates) {
-        $entityManager = $this->getDoctrine()->getManager();
-
         foreach ($exchangeRates as $row) {
-            $exchangeRates = new ExchangeRates();
-            $exchangeRates->setBaseCurrency($row['base_currency']);
-            $exchangeRates->setCurrency($row['currency']);
-            $exchangeRates->setExchangeRate(number_format((float) $row['exchange_rate'], 2, '.', ''));
-            $exchangeRates->setCreatedDatetime(new \DateTime('@' . strtotime('now')));
-            $exchangeRates->setUpdatedDatetime(new \DateTime('@' . strtotime('now')));
-            $entityManager->persist($exchangeRates);
+            $this->saveExchangeRate($row['base_currency'], $row['currency'], $row['exchange_rate']);
         }
-        $entityManager->flush();
     }
 
     /**
@@ -139,4 +126,22 @@ class ExchnageRatesController extends AbstractController {
         return $jsondata;
     }
 
+    /**
+     * Function to save exchange rate data in database table
+     * 
+     * @param type $baseCurrency
+     * @param type $currency
+     * @param type $exchangeRate
+     */
+    public function saveExchangeRate($baseCurrency, $currency, $rate) {
+        $entityManager = $this->getDoctrine()->getManager();
+        $exchangeRates = new ExchangeRates();
+        $exchangeRates->setBaseCurrency($baseCurrency);
+        $exchangeRates->setCurrency($currency);
+        $rateValue = number_format((float) $rate, 2, '.', '');
+        $exchangeRates->setExchangeRate($rateValue);
+        $exchangeRates->setCreatedDatetime(new \DateTime('@' . strtotime('now')));
+        $entityManager->persist($exchangeRates);
+        $entityManager->flush();
+    }
 }

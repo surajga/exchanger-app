@@ -14,10 +14,10 @@
         <h1 class="align-center"> Exchanges Rates For : {{ base_currency }}</h1>
         <div class='row'>
             <div class='col-6'>
-                <select id='select_base_currency' class="form-input">
+                <select id='select-base-currency' class="form-input">
                     {% for curr in base_currencies%}
                         <option {% if curr == base_currency %} selected='selected' {% endif %} value='{{ curr }}'
-                            data-attr-href='{{ path('show_rates') }}?base={{ curr }}'>{{ curr }}</option>
+                                                               data-attr-href='{{ path('show_rates') }}?base={{ curr }}'>{{ curr }}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -30,58 +30,54 @@
         <br /><br />
         <hr />
         <div class='row'>
-            <div class='row'>
-                <table id="tbl-exchange-rate" class="display">
-                    <thead>
+            <table id="tbl-exchange-rate" class="display">
+                <thead>
+                    <tr>
+                        <th>Currency</th>
+                        <th>Exchange Rate</th>
+                        <th>Created On</th>
+                        <th>Last updated On</th>                           
+                        <th>Action</th>                           
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for rate in exchange_rates%}
                         <tr>
-                            <th>Currency</th>
-                            <th>Exchange Rate</th>
-                            <th>Created On</th>
-                            <th>Last updated On</th>                           
-                            <th>Action</th>                           
+                            <td>{{ rate.currency }}</td>
+                            <td>{{ rate.exchangeRate }}</td>
+                            <td>{{ rate.createdDatetime|date('d-M-Y h:i a') }}</td>
+                            <td>{{ rate.updatedDatetime|date('d-M-Y h:i a') }}</td>
+                            <td>
+                                <a href='{{ path('deleteExchangeRate') }}?id={{ rate.id}}' class='btn btn-danger btn-right'>Delete</a>
+                                <button class='btn btn-warning btn-right edit-exchange-rate' data-rid="{{ rate.id}}" data-currency="{{ rate.currency}}" data-value="{{ rate.exchangeRate}}">Edit</button>
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        {% for rate in exchange_rates%}
-                            <tr>
-                                <td>{{ rate.currency }}</td>
-                                <td>{{ rate.exchangeRate }}</td>
-                                <td>{{ rate.createdDatetime|date('d-M-Y h:i a') }}</td>
-                                <td>{{ rate.updatedDatetime|date('d-M-Y h:i a') }}</td>
-                                <td>
-                                    <a href='{{ path('deleteExchangeRate') }}?id={{ rate.id}}' class='btn btn-danger btn-right'>Delete</a>
-                                    <button class='btn btn-warning btn-right edit-exchange-rate' data-rid="{{ rate.id}}" data-currency="{{ rate.currency}}" data-value="{{ rate.exchangeRate}}">Edit</button>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-
-                </table>
-            </div>
+                    {% endfor %}
+                </tbody>
+            </table>
             <div id='frm-exchange' style='display:none' title="Add exchange rate">
-                <input type='hidden' name='default_currency' id='default_currency' value='{{ base_currency }}'/>
+                <input type='hidden' name='default_currency' id='default-currency' value='{{ base_currency }}'/>
                 <div>
-                    <lable>Default Currency : {{ base_currency }}</lable>
+                    <label>Default Currency : {{ base_currency }}</label>
                 </div>
                 <br/>
                 <div>
-                    <lable>Currency :</lable>
+                    <label>Currency :</label>
                     <br/>
                     <select id='currency' class="form-input">
-                        <option value=''>-- Select Currency --</option>
+                        <option value=''>-- Select --</option>
                         {% for currency in currnecy_list%}
                             <option value='{{ currency }}'>{{ currency }}</option>
                         {% endfor %}
                     </select>
                 </div><br/>
                 <div>
-                    <lable>Exchange Rate:</lable>
-                    <input type='text' id='input-exchange-rate' class="form-input" />
+                    <label>Exchange Rate:</label>
+                    <input type='text' id='input-exchange-rate' class="form-input" placeholder="Exchange Rate" />
                 </div>
                 <br/>
                 <div><input type='button' id='save-exchange-rate' data-rid="" class="btn btn-link" value='Save'/></div>
             </div>
-
         </div>
     </div>
 {% endblock %}

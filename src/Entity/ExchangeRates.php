@@ -38,8 +38,8 @@ class ExchangeRates
     private $created_datetime;
 
     /**
-     * @ORM\Column(type="datetime")
-     */
+    * @ORM\Column(type="datetime")
+    */
     private $updated_datetime;
 
     public function getId(): ?int

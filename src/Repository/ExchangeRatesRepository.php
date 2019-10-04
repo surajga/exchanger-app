@@ -18,26 +18,21 @@ class ExchangeRatesRepository extends ServiceEntityRepository {
         parent::__construct($registry, ExchangeRates::class);
     }
 
-     /**
+    /**
      * Save exchange rates data into database table
      * @param JSON $exchangeRatesData
      * @return int
      */
-
-    private function saveExchangeRate($exchangeRates,$baseCurrency) {
+    private function saveExchangeRate($exchangeRates, $baseCurrency) {
         $objEntityManager = $this->getDoctrine()->getManager();
-
         foreach ($exchangeRates->rates as $key => $exchangeRate) {
             $objExchangeRate = new ExchangeRates();
             $objExchangeRate->setBaseCurrency($baseCurrency);
             $objExchangeRate->setCurrency($key);
             $objExchangeRate->setExchangeRate(number_format((float) $exchangeRate, 2, '.', ''));
             $objExchangeRate->setCreatedDatetime(new \DateTime('@' . strtotime('now')));
-
             $objEntityManager->persist($objExchangeRate);
         }
-
         $objEntityManager->flush();
     }
-
 }

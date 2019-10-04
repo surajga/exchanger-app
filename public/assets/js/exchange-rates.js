@@ -1,30 +1,28 @@
 $(document).ready(function () {
-
     $('#tbl-exchange-rate').DataTable({
         "paging": false,
         "ordering": true,
         "searching": false,
         "info": false
     });
+    
     $('#add-exchange-rate').click(function () {
         clearForm();
         $('#frm-exchange').dialog();
     });
 
     $('#save-exchange-rate').click(function () {
-        saveExchangeRate($('#save-exchange-rate').val(), $('#save-exchange-rate').attr('data-rid'));
+        saveExchangeRate();
         $(this).attr('disabled',true);
     });
 
     $('.edit-exchange-rate').click(function () {
-        console.log('here');
         clearForm();
         setEditForm($(this));
         $('#frm-exchange').dialog();
     });
 
-
-    $('#select_base_currency').change(function () {
+    $('#select-base-currency').change(function () {
         window.location.href = $(this).find('option:selected').attr("data-attr-href");
     });
 });
@@ -33,15 +31,18 @@ $(document).ready(function () {
  * Function to create/update destnation
  */
 function saveExchangeRate(action, id) {
+    var action = $('#save-exchange-rate').val();
+    var id = $('#save-exchange-rate').attr('data-rid');
     var currency = $('#currency').val();
     var exchangeRate = $('#input-exchange-rate').val();
     var reqType = 'POST';
     var url = '/exchange/add';
-
+    
     if (currency === '') {
         alert('Please select currency');
         return false;
     }
+    
     if (exchangeRate === '' || !$.isNumeric(exchangeRate)) {
         alert('Invalid exchange rate value');
         return false;
@@ -55,7 +56,7 @@ function saveExchangeRate(action, id) {
     $.ajax({
         'type': reqType,
         'url': url,
-        'data': 'base_currency=' + $("#default_currency").val() + '&currency=' + currency + '&exchangeRate=' + exchangeRate + '&id=' + id,
+        'data': 'base_currency=' + $("#default-currency").val() + '&currency=' + currency + '&exchangeRate=' + exchangeRate + '&id=' + id,
         'success': function () {
             alert('Exchange rate data saved successfully!');
             $('#frm-exchange').dialog('close');
@@ -66,7 +67,6 @@ function saveExchangeRate(action, id) {
         }
     });
 }
-
 
 /**
  * Function to clear form 
