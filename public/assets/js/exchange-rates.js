@@ -6,22 +6,22 @@ $(document).ready(function () {
         "info": false
     });
 
-    $('#add-exchange-rate').click(function () {
+    $('#add-exchange-rate').click(function addExchangeRate() {
         clearForm();
         $('#frm-exchange').dialog();
     });
 
-    $('#save-exchange-rate').click(function () {
+    $('#save-exchange-rate').click(function saveExchageRateData() {
         saveExchangeRate();
     });
 
-    $('.edit-exchange-rate').click(function () {
+    $('.edit-exchange-rate').click(function editExchangeRate() {
         clearForm();
         setEditForm($(this));
         $('#frm-exchange').dialog();
     });
 
-    $('#select-base-currency').change(function () {
+    $('#select-base-currency').change(function selectBaseCurrency() {
         window.location.href = $(this).find('option:selected').attr("data-attr-href");
     });
 });
@@ -29,7 +29,7 @@ $(document).ready(function () {
 /**
  * Function to create/update destnation
  */
-function saveExchangeRate(action, id) {
+function saveExchangeRate() {
     var action = $('#save-exchange-rate').val();
     var id = $('#save-exchange-rate').attr('data-rid');
     var currency = $('#currency').val();

@@ -40,8 +40,11 @@ class ExchangeRateControllerTest extends WebTestCase {
      */
     public function testAddExchangeRate($base, $currency, $rate) {
         $this->assertNotNull($base);
+        $this->assertIsString($base);
         $this->assertNotNull($currency);
+        $this->assertIsString($base);
         $this->assertNotNull($rate);
+        $this->assertIsFloat($rate);
 
         $formData = array(
             'base_currency' => $base,
@@ -77,8 +80,11 @@ class ExchangeRateControllerTest extends WebTestCase {
      */
     public function testUpdateExchangeRate($id, $base, $currency, $rate) {
         $this->assertNotNull($base);
+        $this->assertIsString($base);
         $this->assertNotNull($currency);
+        $this->assertIsString($base);
         $this->assertNotNull($rate);
+        $this->assertIsFloat($rate);
 
         $formData = array(
             'id' => $id,
@@ -95,7 +101,6 @@ class ExchangeRateControllerTest extends WebTestCase {
                 ->getRepository(ExchangeRates::class)
                 ->findOneBy(array('id' => $id));
 
-        $this->assertNotNull($exchangeRate);
         $this->assertSame($base, $exchangeRate->getBaseCurrency());
         $this->assertSame($currency, $exchangeRate->getCurrency());
         $this->assertSame($rate, $exchangeRate->getExchangeRate());
@@ -106,7 +111,8 @@ class ExchangeRateControllerTest extends WebTestCase {
      */
     public function getExchangeRateEditData() {
         yield[1, 'USD', 'INR', 67.69];
-        yield[2, 'USD', 'GBP', 1.23];
+        yield[2, 22, 'GBP', 1.23];
+        yield[2, 'INR', 'GBP', 'XYZ'];
         yield[3, NULL, 'GBP', 1.23];
     }
 
@@ -118,6 +124,14 @@ class ExchangeRateControllerTest extends WebTestCase {
             'id' => $id
         );
         $client = static::createClient();
+
+        /** @var ExchangeRates $foundExchangeRate */
+        $foundExchangeRate = $client->getContainer()
+                ->get('doctrine')
+                ->getRepository(ExchangeRates::class)
+                ->findOneBy(array('id' => $id));
+        $this->assertNotNull($foundExchangeRate);
+
         $crawler = $client->request('GET', '/exchange/delete', $formData);
         $crawler = $client->followRedirect();
 
