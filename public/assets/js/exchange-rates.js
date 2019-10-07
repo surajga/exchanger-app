@@ -5,7 +5,7 @@ $(document).ready(function () {
         "searching": false,
         "info": false
     });
-    
+
     $('#add-exchange-rate').click(function () {
         clearForm();
         $('#frm-exchange').dialog();
@@ -13,7 +13,7 @@ $(document).ready(function () {
 
     $('#save-exchange-rate').click(function () {
         saveExchangeRate();
-        $(this).attr('disabled',true);
+        $(this).attr('disabled', true);
     });
 
     $('.edit-exchange-rate').click(function () {
@@ -37,12 +37,12 @@ function saveExchangeRate(action, id) {
     var exchangeRate = $('#input-exchange-rate').val();
     var reqType = 'POST';
     var url = '/exchange/add';
-    
+
     if (currency === '') {
         alert('Please select currency');
         return false;
     }
-    
+
     if (exchangeRate === '' || !$.isNumeric(exchangeRate)) {
         alert('Invalid exchange rate value');
         return false;
@@ -56,13 +56,20 @@ function saveExchangeRate(action, id) {
     $.ajax({
         'type': reqType,
         'url': url,
-        'data': 'base_currency=' + $("#default-currency").val() + '&currency=' + currency + '&exchangeRate=' + exchangeRate + '&id=' + id,
-        'success': function () {
-            alert('Exchange rate data saved successfully!');
-            $('#frm-exchange').dialog('close');
-            window.location.reload();
+        'data': 'base_currency=&currency=' + currency + '&exchangeRate=' + exchangeRate + '&id=' + id,
+        'dataType': 'json',
+        'success': function (resp) {
+            if (resp.status == 'done') {
+//                alert('Exchange rate data saved successfully!');
+//                $('#frm-exchange').dialog('close');
+//                window.location.reload();
+            } else {
+                alert(resp.errors);
+            }
+            $('#save-exchange-rate').attr('disabled', false);
         },
         'error': function () {
+            $('#save-exchange-rate').attr('disabled', false);
             alert('An error occured, please try again!');
         }
     });

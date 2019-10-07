@@ -26,15 +26,21 @@ class ApiServiceTest extends WebTestCase {
     public function testApiUrl(string $apiUrl) {
         $objHttpClient = HttpClient::create();
         $response = $objHttpClient->request('GET', $apiUrl);
-        $this->assertEquals(200, $response->getStatusCode());        
-
+        $this->assertEquals(200, $response->getStatusCode());      
         $data = json_decode($response->getContent(),true);
+        
         $this->assertArrayHasKey('rates', $data);
+        $this->assertArrayHasKey('base', $data);
+        $this->assertArrayHasKey('date', $data);
     }
 
+    /**
+     * Data provider for testApiUrl
+     */
     public function getUrls() {
         yield ['http://api.exchangeratesapi.io/latest?base=USD'];
         yield ['http://api.exchangeratesapi.io/latest?base=INR'];
+        yield ['http://api.exchangeratesapi.io/latest?base=FAIL'];
     }
 
 }

@@ -12,10 +12,6 @@ use App\Entity\Constants;
 
 class ExchnageRatesController extends AbstractController {
 
-//    const DEFAULT_CURRENCY = 'USD';
-//    const BASE_CURRENCIES = array('USD', 'INR');
-//    const CURRENCY_LIST = array('AUD', 'GBP', 'EUR', 'INR', 'USD');
-
     /**
      * Constructor function
      */
@@ -55,7 +51,8 @@ class ExchnageRatesController extends AbstractController {
         $currency = $request->request->get('currency');
         $exchangeRate = $request->request->get('exchangeRate');
         $insertId = $this->saveExchangeRate($baseCurrency, $currency, $exchangeRate);
-        return new Response('Data saved');
+
+        return new JsonResponse(array('status' => 'done'));
     }
 
     /**
@@ -74,10 +71,10 @@ class ExchnageRatesController extends AbstractController {
             $exchangeRates->setUpdatedDatetime(new \DateTime('@' . strtotime('now')));
             $entityManager->persist($exchangeRates);
             $entityManager->flush();
-            return new Response('Data saved ' . $exchangeRates->getId());
+            return new JsonResponse(array('status' => 'done'));
         }
 
-        return new Response('Could not save data. Please try again');
+        return new JsonResponse(array('status' => 'error', 'errors' => 'Unable save data. Please try agian!'));
     }
 
     /**
@@ -144,4 +141,5 @@ class ExchnageRatesController extends AbstractController {
         $entityManager->persist($exchangeRates);
         $entityManager->flush();
     }
+
 }

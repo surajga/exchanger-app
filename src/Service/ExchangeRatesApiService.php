@@ -10,6 +10,7 @@ namespace App\Service;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpClient\HttpClient;
+use App\Entity\Constants;
 
 /**
  * 
@@ -18,10 +19,11 @@ use Symfony\Component\HttpClient\HttpClient;
  */
 class ExchangeRatesApiService {
 
-    private $api_url;
-
+    /**
+     * Constructor function
+     */
     public function __construct() {
-        $this->api_url = 'http://api.exchangeratesapi.io/';
+        
     }
 
     /**
@@ -32,9 +34,9 @@ class ExchangeRatesApiService {
     public function getCurrentExchangeRate($base) {
 
         $objHttpClient = HttpClient::create();
-        $responseData = $objHttpClient->request('GET', $this->api_url . 'latest?base=' . $base)->getContent();
-        $data = json_decode($responseData,true);
-        
+        $responseData = $objHttpClient->request('GET', Constants::EXCHANGE_RATE_API_URL . 'latest?base=' . $base)->getContent();
+        $data = json_decode($responseData, true);
+
         foreach ($data['rates'] as $currency => $rate) {
             $exchangeRates[] = array(
                 'base_currency' => $base,
@@ -42,8 +44,7 @@ class ExchangeRatesApiService {
                 'exchange_rate' => $rate
             );
         }
-        
+
         return $exchangeRates;
     }
-
 }

@@ -39,6 +39,10 @@ class ExchangeRateControllerTest extends WebTestCase {
      * @dataProvider getExchangeRateAddData
      */
     public function testAddExchangeRate($base, $currency, $rate) {
+        $this->assertNotNull($base);
+        $this->assertNotNull($currency);
+        $this->assertNotNull($rate);
+
         $formData = array(
             'base_currency' => $base,
             'currency' => $currency,
@@ -46,12 +50,12 @@ class ExchangeRateControllerTest extends WebTestCase {
         );
         $client = static::createClient();
         $crawler = $client->request('POST', '/exchange/add', $formData);
-        
+
         /** @var ExchangeRates $exchangeRate */
         $exchangeRate = $client->getContainer()
                 ->get('doctrine')
                 ->getRepository(ExchangeRates::class)
-                ->findOneBy(array('currency' => $currency, 'base_currency' => $base,'exchange_rate'=>$rate));
+                ->findOneBy(array('currency' => $currency, 'base_currency' => $base, 'exchange_rate' => $rate));
 
         $this->assertNotNull($exchangeRate);
         $this->assertSame($base, $exchangeRate->getBaseCurrency());
@@ -59,15 +63,23 @@ class ExchangeRateControllerTest extends WebTestCase {
         $this->assertSame($rate, $exchangeRate->getExchangeRate());
     }
 
+    /**
+     * Data provider for function testAddExchangeRate
+     */
     public function getExchangeRateAddData() {
         yield['USD', 'INR', 67.67];
-        yield['USD', 'GBP', 1.22];
+//        yield['USD', 'GBP', 1.22];
+//        yield['USD', NULL, 1.22];
     }
 
     /**
      * @dataProvider getExchangeRateEditData
      */
     public function testUpdateExchangeRate($id, $base, $currency, $rate) {
+        $this->assertNotNull($base);
+        $this->assertNotNull($currency);
+        $this->assertNotNull($rate);
+
         $formData = array(
             'id' => $id,
             'base_currency' => $base,
@@ -89,9 +101,40 @@ class ExchangeRateControllerTest extends WebTestCase {
         $this->assertSame($rate, $exchangeRate->getExchangeRate());
     }
 
+    /**
+     * Data provider for function testUpdateExchangeRate
+     */
     public function getExchangeRateEditData() {
         yield[1, 'USD', 'INR', 67.69];
-        yield[2, 'USD', 'GBP', 1.23];
+//        yield[2, 'USD', 'GBP', 1.23];
+//        yield[3, NULL, 'GBP', 1.23];
+    }
+
+    /**
+     * @dataProvider getDeleteId
+     */
+    public function testDeleteExchangeRate($id) {
+        $formData = array(
+            'id' => $id
+        );
+        $client = static::createClient();
+        $crawler = $client->request('GET', '/exchange/delete', $formData);
+        $crawler = $client->followRedirect();
+
+        /** @var ExchangeRates $exchangeRate */
+        $exchangeRate = $client->getContainer()
+                ->get('doctrine')
+                ->getRepository(ExchangeRates::class)
+                ->findOneBy(array('id' => $id));
+        $this->assertNull($exchangeRate);
+    }
+
+    /**
+     *  Data provider for tesDeleteExchangeRate
+     */
+    public function getDeleteId() {
+        yield[3];
+        yield[4];
     }
 
 }
