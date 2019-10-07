@@ -13,7 +13,6 @@ $(document).ready(function () {
 
     $('#save-exchange-rate').click(function () {
         saveExchangeRate();
-        $(this).attr('disabled', true);
     });
 
     $('.edit-exchange-rate').click(function () {
@@ -56,15 +55,18 @@ function saveExchangeRate(action, id) {
     $.ajax({
         'type': reqType,
         'url': url,
-        'data': 'base_currency=&currency=' + currency + '&exchangeRate=' + exchangeRate + '&id=' + id,
+        'beforeSend': function () {
+            $(this).attr('disabled', true);
+        },
+        'data': 'base_currency=' + $("#default-currency").val() + '&currency=' + currency + '&exchangeRate=' + exchangeRate + '&id=' + id,
         'dataType': 'json',
         'success': function (resp) {
             if (resp.status == 'done') {
-//                alert('Exchange rate data saved successfully!');
-//                $('#frm-exchange').dialog('close');
-//                window.location.reload();
+                $('#frm-exchange').dialog('close');
+                alert('Exchange rate data saved successfully!');
+                window.location.reload();
             } else {
-                alert(resp.errors);
+                alert('Please provide valid data');
             }
             $('#save-exchange-rate').attr('disabled', false);
         },

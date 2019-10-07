@@ -6,9 +6,12 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use App\Service\ExchangeRatesApiService;
 use App\Entity\ExchangeRates;
 use App\Entity\Constants;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class ExchnageRatesController extends AbstractController {
 
@@ -46,34 +49,72 @@ class ExchnageRatesController extends AbstractController {
     /**
      * @Route("/exchange/add", name="addExchangeRates", methods={"POST"})
      */
-    public function addExchangeRate(Request $request) {
+    public function addExchangeRate(Request $request, ValidatorInterface $validator) {
         $baseCurrency = $request->request->get('base_currency');
         $currency = $request->request->get('currency');
-        $exchangeRate = $request->request->get('exchangeRate');
-        $insertId = $this->saveExchangeRate($baseCurrency, $currency, $exchangeRate);
+        $exchangeRate = number_format((float) $request->request->get('exchangeRate'), 2, '.', '');
+        $input = ['base_currency' => $baseCurrency, 'currency' => $currency, 'exchangeRate' => $exchangeRate];
 
-        return new JsonResponse(array('status' => 'done'));
+        $constraints = new Assert\Collection([
+            'base_currency' => [new Assert\NotBlank],
+            'currency' => [new Assert\Length(['min' => 2]), new Assert\NotBlank, new Assert\Type('string')],
+            'exchangeRate' => [new Assert\NotBlank],
+        ]);
+
+        $violations = $validator->validate($input, $constraints);
+        if (count($violations) > 0) {
+            $errorMessages = '';
+            foreach ($violations as $violation) {
+                $errorMessages .= $violation->getMessage();
+            }
+            return new JsonResponse(array('status' => 'invalid', 'errors' => $errorMessages));
+        } else {
+            $insertId = $this->saveExchangeRate($baseCurrency, $currency, $exchangeRate);
+            return new JsonResponse(array('status' => 'done'));
+        }
     }
 
     /**
      * @Route("/exchange/update", name="updateExchangeRate", methods={"PUT"})
      */
-    public function updateExchangeRate(Request $request) {
-        $entityManager = $this->getDoctrine()->getManager();
-        $exchangeRates = $entityManager->getRepository(ExchangeRates::class)
-                ->find($request->request->get('id'));
+    public function updateExchangeRate(Request $request, ValidatorInterface $validator) {
+        $baseCurrency = $request->request->get('base_currency');
+        $currency = $request->request->get('currency');
+        $exchangeRate = number_format((float) $request->request->get('exchangeRate'), 2, '.', '');
+        $input = ['base_currency' => $baseCurrency, 'currency' => $currency, 'exchangeRate' => $exchangeRate];
 
-        if (!is_null($exchangeRates)) {
-            $exchangeRates->setBaseCurrency($request->request->get('base_currency'));
-            $exchangeRates->setCurrency($request->request->get('currency'));
-            $rateValue = number_format((float) $request->request->get('exchangeRate'), 2, '.', '');
-            $exchangeRates->setExchangeRate($rateValue);
-            $exchangeRates->setUpdatedDatetime(new \DateTime('@' . strtotime('now')));
-            $entityManager->persist($exchangeRates);
-            $entityManager->flush();
-            return new JsonResponse(array('status' => 'done'));
+        $constraints = new Assert\Collection([
+            'base_currency' => [new Assert\NotBlank],
+            'currency' => [new Assert\Length(['min' => 2]), new Assert\NotBlank, new Assert\Type('string')],
+            'exchangeRate' => [new Assert\NotBlank],
+        ]);
+
+        $violations = $validator->validate($input, $constraints);
+
+        if (count($violations) > 0) {
+            $errorMessages = '';
+            foreach ($violations as $violation) {
+                $errorMessages .= $violation->getMessage();
+            }
+            return new JsonResponse(array('status' => 'invalid', 'errors' => $errorMessages));
+        } else {
+            $entityManager = $this->getDoctrine()->getManager();
+            $exchangeRates = $entityManager->getRepository(ExchangeRates::class)
+                    ->find($request->request->get('id'));
+
+            if (!is_null($exchangeRates)) {
+                $exchangeRates->setBaseCurrency($baseCurrency);
+                $exchangeRates->setCurrency($currency);
+                $rateValue = number_format((float) $exchangeRate, 2, '.', '');
+                $exchangeRates->setExchangeRate($rateValue);
+                $exchangeRates->setUpdatedDatetime(new \DateTime('@' . strtotime('now')));
+                $entityManager->persist($exchangeRates);
+                $entityManager->flush();
+                return new JsonResponse(array('status' => 'done'));
+            } else {
+                return new JsonResponse(array('status' => 'error', 'errors' => 'Unable save data. Please try agian!'));
+            }
         }
-
         return new JsonResponse(array('status' => 'error', 'errors' => 'Unable save data. Please try agian!'));
     }
 
@@ -135,11 +176,9 @@ class ExchnageRatesController extends AbstractController {
         $exchangeRates = new ExchangeRates();
         $exchangeRates->setBaseCurrency($baseCurrency);
         $exchangeRates->setCurrency($currency);
-        $rateValue = number_format((float) $rate, 2, '.', '');
-        $exchangeRates->setExchangeRate($rateValue);
+        $exchangeRates->setExchangeRate($rate);
         $exchangeRates->setCreatedDatetime(new \DateTime('@' . strtotime('now')));
         $entityManager->persist($exchangeRates);
         $entityManager->flush();
     }
-
 }
