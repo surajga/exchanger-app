@@ -68,8 +68,8 @@ class ExchangeRateControllerTest extends WebTestCase {
      */
     public function getExchangeRateAddData() {
         yield['USD', 'INR', 67.67];
-//        yield['USD', 'GBP', 1.22];
-//        yield['USD', NULL, 1.22];
+        yield['USD', 'GBP', 1.22];
+        yield['USD', NULL, 1.22];
     }
 
     /**
@@ -106,8 +106,8 @@ class ExchangeRateControllerTest extends WebTestCase {
      */
     public function getExchangeRateEditData() {
         yield[1, 'USD', 'INR', 67.69];
-//        yield[2, 'USD', 'GBP', 1.23];
-//        yield[3, NULL, 'GBP', 1.23];
+        yield[2, 'USD', 'GBP', 1.23];
+        yield[3, NULL, 'GBP', 1.23];
     }
 
     /**
